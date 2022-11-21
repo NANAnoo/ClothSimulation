@@ -5,7 +5,9 @@
 #include "tiny_obj_loader.h"
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
+#include <QGL>
 
 class ClothModel
 {
@@ -38,17 +40,32 @@ public:
     void saveAsFile(std::string file_path);
     // update mass point
     void update(SimulationParameters &params);
+    // valid
+    bool isValid() {return is_valid;};
 
 private:
-    // a map that stores all vertices and its neighbourhood
-    std::unordered_map<unsigned int, unsigned int> neighbours_of_vertices;
+    // sturct
+    typedef struct {
+        GLuint vb_id;  // vertex buffer id
+        int numTriangles;
+        unsigned int material_id;
+    } DrawObject;
+    // a map that stores all vertices and its neighbours
+    std::unordered_map<unsigned int, std::unordered_set<unsigned int>> neighbours_of_vertices;
     // a vector that stores all position of the vertices
     std::vector<Vec3> particles_position;
     // a vector that stores all velocity of each vertices
     std::vector<Vec3> particles_velocity;
-    // render model that come from tiny obj
-    std::vector<tinyobj::material_t> materials;
 
+    // rendering objects:
+    std::vector<DrawObject> objects;
+    std::vector<tinyobj::material_t> materials;
+    // textures
+    std::unordered_map<std::string, GLuint> textures;
+    // texture coords
+    std::vector<unsigned int> texture_indices;
+    // valid
+    bool is_valid;
 };
 
 #endif // CLOTHMODEL_H

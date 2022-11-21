@@ -3,14 +3,22 @@
 #include <QtOpenGL>
 #include <iostream>
 
-static std::string GetBaseDir(const std::string& filepath) {
-  if (filepath.find_last_of("/\\") != std::string::npos)
-    return filepath.substr(0, filepath.find_last_of("/\\"));
-  return "";
+#ifndef TINYOBJLOADER_IMPLEMENTATION
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+#endif
+
+static std::string GetBaseDir(const std::string& filepath) 
+{
+    if (filepath.find_last_of("/\\") != std::string::npos)
+        return filepath.substr(0, filepath.find_last_of("/\\"));
+    return "";
 }
 
 ClothModel::ClothModel(std::string file_path)
 {
+    is_valid = false;
+    // build model from obj file
     tinyobj::attrib_t inattrib;
     std::vector<tinyobj::shape_t> inshapes;
 
@@ -36,6 +44,11 @@ ClothModel::ClothModel(std::string file_path)
     if (!err.empty()) {
       std::cerr << err << std::endl;
     }
+    if (!ret) {
+      std::cerr << "Failed to load " << file_path << std::endl;
+    }
+    tinyobj::shape_t shape = inshapes[0];
+    shape.mesh.num_face_vertices;
 }
 
 void ClothModel::render()

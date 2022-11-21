@@ -32,7 +32,8 @@ HEADERS += \
     src/RenderWidget.h \
     src/MainWindow.h \ \
     src/Vec3.h \
-    src/tiny_obj_loader.h
+    src/tiny_obj_loader.h \
+    src/stb_image.h \
 
 win32 {
     LIBS += -lopengl32

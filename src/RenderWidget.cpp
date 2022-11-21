@@ -46,6 +46,11 @@ void RenderWidget::paintGL()
     glVertex3f(0, 0, 0);
     glVertex3f(0, 0, 1);
     glEnd();
+    
+    // update model
+    if (model != nullptr && model->isValid()) {
+        model->render();
+    }
 }
 
 // mouse handle

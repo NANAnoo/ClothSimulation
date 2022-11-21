@@ -65,7 +65,7 @@ Vec3 Vec3::Cross(Vec3 V)
 Vec3 Vec3::normalize()
 {
     float x = Array[0], y = Array[1], z = Array[2];
-    float L = std::sqrt(x*x + y*y + z*z);
+    float L = sqrt(x*x + y*y + z*z);
     if (L == 0.f) {
         return Vec3(0, 1, 0);
     }
@@ -74,7 +74,7 @@ Vec3 Vec3::normalize()
 
 float Vec3::lenth()
 {
-    return std::sqrt(Array[0]* Array[0]+ Array[1] * Array[1]+ Array[2] * Array[2]);
+    return sqrt(Array[0]* Array[0]+ Array[1] * Array[1]+ Array[2] * Array[2]);
 }
 
 float Vec3::x()

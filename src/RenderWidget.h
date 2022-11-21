@@ -3,6 +3,8 @@
 
 #include <QOpenGLWidget>
 
+#include "ClothModel.h"
+
 class RenderWidget : public QOpenGLWidget
 {
 public:
@@ -13,10 +15,16 @@ public:
         rotation_x = 0;
         rotation_y = 0;
     }
+    // set up model
+    void setupModel(ClothModel *model) {
+        this->model = model;
+        update();
+    };
     // dealloc
     ~RenderWidget();
 
 protected:
+    ClothModel *model;
     // mouse event handler
     virtual void mousePressEvent(QMouseEvent *event);
     virtual void mouseMoveEvent(QMouseEvent *event);

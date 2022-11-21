@@ -4,7 +4,11 @@
 #include <QMainWindow>
 #include <QWidget>
 
+#include <QPushButton>
+#include <string>
+
 #include "RenderWidget.h"
+#include "ClothModel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -18,6 +22,35 @@ public:
     void loadContent();
 
     RenderWidget * render;
+
+private:
+    QPushButton *load_obj_btn;
+    void loadObj();
+
+    QPushButton *stop_start_btn;
+    void startStop();
+    bool is_playing;
+
+    QPushButton *save_current_frame;
+    void saveCurrentFrame();
+
+    // all scenes:
+    QPushButton *free_fall_btn;
+    void freeFall();
+    QPushButton *fall_with_ball_btn;
+    void freeFallToBall();
+    QPushButton *fall_with_fixed_corners_btn;
+    void fallFixedCorners();
+    QPushButton *fall_with_spiningball_btn;
+    void fallToSpiningBall();
+    QPushButton *wind_and_fixed_corners_btn;
+    void windAndFixedCorners();
+
+    QPushButton *save_as_vedio;
+    void saveAsvideo();
+
+    // model
+    ClothModel *model;
 };
 
 #endif // MAINWINDOW_H
