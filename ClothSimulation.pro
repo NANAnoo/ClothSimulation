@@ -21,13 +21,23 @@ CONFIG += c++11
 
 
 SOURCES += \
+    src/ClothModel.cpp \
     src/RenderWidget.cpp \
     src/MainWindow.cpp \
+    src/Vec3.cpp \
     src/main.cpp \
 
 HEADERS += \
+    src/ClothModel.h \
     src/RenderWidget.h \
-    src/MainWindow.h \
+    src/MainWindow.h \ \
+    src/Vec3.h \
+    src/tiny_obj_loader.h
+
+win32 {
+    LIBS += -lopengl32
+    LIBS += -lglu32
+}
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
