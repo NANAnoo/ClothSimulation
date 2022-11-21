@@ -19,7 +19,7 @@ public:
     void setupModel(ClothModel *model) {
         this->model = model;
         update();
-    };
+    }
     // dealloc
     ~RenderWidget();
 

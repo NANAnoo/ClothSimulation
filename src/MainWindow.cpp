@@ -48,10 +48,10 @@ void MainWindow::loadContent()
     // initialize
     render->setGeometry(10, 10, width() / 4 * 3 - 20, height() - 20);
 
-    unsigned int left = width() / 4 * 3 + 10;
-    unsigned int size_h = height() / 32;
-    unsigned int size_w = width() / 4 - 20;
-    unsigned int grid_size = height() / 16;
+    int left = width() / 4 * 3 + 10;
+    int size_h = height() / 32;
+    int size_w = width() / 4 - 20;
+    int grid_size = height() / 16;
     // layout
     load_obj_btn->setGeometry(left, grid_size, size_w, size_h);
     stop_start_btn->setGeometry(left, 2 * grid_size, size_w, size_h);

@@ -12,7 +12,7 @@
 class ClothModel
 {
 public:
-    ClothModel(std::string file_path);
+    ClothModel(std::string &file_path);
     ~ClothModel();
 
 // a sturcture that store every thing that needed in simulation
@@ -41,15 +41,9 @@ public:
     // update mass point
     void update(SimulationParameters &params);
     // valid
-    bool isValid() {return is_valid;};
+    bool isValid() {return is_valid;}
 
 private:
-    // sturct
-    typedef struct {
-        GLuint vb_id;  // vertex buffer id
-        int numTriangles;
-        unsigned int material_id;
-    } DrawObject;
     // a map that stores all vertices and its neighbours
     std::unordered_map<unsigned int, std::unordered_set<unsigned int>> neighbours_of_vertices;
     // a vector that stores all position of the vertices
@@ -57,9 +51,16 @@ private:
     // a vector that stores all velocity of each vertices
     std::vector<Vec3> particles_velocity;
 
+    // prepare rendering:
+    void preRendering();
+
     // rendering objects:
-    std::vector<DrawObject> objects;
+    GLuint vb_id;  // vertex buffer id
+    int numTriangles;
+    unsigned int material_id;
     std::vector<tinyobj::material_t> materials;
+    tinyobj::attrib_t inattrib;
+    tinyobj::shape_t shape;
     // textures
     std::unordered_map<std::string, GLuint> textures;
     // texture coords

@@ -9,6 +9,7 @@ void RenderWidget::initializeGL()
 {
     glEnable(GL_DEPTH_TEST);
     glClearColor(0, 0, 0, 0);
+    model = nullptr;
 }
 
 void RenderWidget::resizeGL(int w, int h)
