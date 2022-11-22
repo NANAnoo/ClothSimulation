@@ -24,7 +24,11 @@ void RenderWidget::resizeGL(int w, int h)
 void RenderWidget::paintGL()
 {
     // clear buffer
+    glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
 
     // set model view
     glMatrixMode(GL_MODELVIEW);
@@ -34,19 +38,19 @@ void RenderWidget::paintGL()
     glRotatef(rotation_x, 1, 0, 0);
     glRotatef(rotation_y, 0, 1, 0);
 
-    // draw axies
-    glLineWidth(1);
-    glBegin(GL_LINES);
-    glColor3f(1, 0, 0);
-    glVertex3f(0, 0, 0);
-    glVertex3f(1, 0, 0);
-    glColor3f(0, 1, 0);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, 1, 0);
-    glColor3f(0, 0, 1);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, 0, 1);
-    glEnd();
+    // // draw axies
+    // glLineWidth(1);
+    // glBegin(GL_LINES);
+    // glColor3f(1, 0, 0);
+    // glVertex3f(0, 0, 0);
+    // glVertex3f(1, 0, 0);
+    // glColor3f(0, 1, 0);
+    // glVertex3f(0, 0, 0);
+    // glVertex3f(0, 1, 0);
+    // glColor3f(0, 0, 1);
+    // glVertex3f(0, 0, 0);
+    // glVertex3f(0, 0, 1);
+    // glEnd();
     
     // update model
     if (model != nullptr && model->isValid()) {
