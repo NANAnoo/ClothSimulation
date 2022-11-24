@@ -5,6 +5,7 @@
 #include <QWidget>
 
 #include <QPushButton>
+#include <QTimer>
 #include <string>
 
 #include "RenderWidget.h"
@@ -24,6 +25,9 @@ public:
     RenderWidget * render;
 
 private:
+    QTimer *cal_timer;
+    QTimer *play_timer;
+    ClothModel::SimulationParameters params;
     QPushButton *load_obj_btn;
     void loadObj();
 

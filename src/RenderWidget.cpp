@@ -1,5 +1,6 @@
 #include "RenderWidget.h"
 #include <QMouseEvent>
+#include <GLUT/glut.h>
 
 RenderWidget::~RenderWidget()
 {
@@ -18,7 +19,7 @@ void RenderWidget::resizeGL(int w, int h)
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-10, 10, -10, 10, -10, 20);
+    glOrtho(-1, 1, -1, 1, -10, 10);
 }
 
 void RenderWidget::paintGL()
@@ -34,24 +35,41 @@ void RenderWidget::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    // transilation
+    glTranslatef(0, -0.5, 0);
+
     // rotation
     glRotatef(rotation_x, 1, 0, 0);
     glRotatef(rotation_y, 0, 1, 0);
 
-    // // draw axies
-    // glLineWidth(1);
-    // glBegin(GL_LINES);
-    // glColor3f(1, 0, 0);
-    // glVertex3f(0, 0, 0);
-    // glVertex3f(1, 0, 0);
-    // glColor3f(0, 1, 0);
-    // glVertex3f(0, 0, 0);
-    // glVertex3f(0, 1, 0);
-    // glColor3f(0, 0, 1);
-    // glVertex3f(0, 0, 0);
-    // glVertex3f(0, 0, 1);
-    // glEnd();
-    
+    glColor3f(0.8, 0.8, 1);
+    for (unsigned int i = 0; i < 21; i ++) {
+        float w = 0.05 * i - 0.5;
+        if (i % 5 == 0) {
+            glLineWidth(2);
+        } else {
+            glLineWidth(1);
+        }
+        glBegin(GL_LINES);
+        glVertex3f(w, 0, -0.5);
+        glVertex3f(w, 0, 0.5);
+        glVertex3f(-0.5, 0, w);
+        glVertex3f(0.5, 0, w);
+        glEnd();
+    }
+
+    // light
+    glEnable(GL_LIGHTING);
+    GLfloat light_position[] = { 0.0, 20.0, 0.0, 0.0 }; 
+    GLfloat light_ambient [] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_diffuse [] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 }; 
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position); 
+    glLightfv(GL_LIGHT0, GL_AMBIENT , light_ambient );
+    glLightfv(GL_LIGHT0, GL_DIFFUSE , light_diffuse ); 
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular); 
+    glEnable(GL_LIGHT0);
+   
     // update model
     if (model != nullptr && model->isValid()) {
         model->render();

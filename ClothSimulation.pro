@@ -39,7 +39,7 @@ win32 {
     LIBS += -lopengl32
     LIBS += -lglu32
 }
-
+LIBS += -F"/Library/Frameworks/" -framework GLUT
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

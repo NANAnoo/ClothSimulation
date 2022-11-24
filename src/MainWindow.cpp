@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     fall_with_fixed_corners_btn = new QPushButton("fixed corners", this);
     connect(fall_with_fixed_corners_btn, &QPushButton::released, this, &MainWindow::fallFixedCorners);
-    
+
     fall_with_spiningball_btn = new QPushButton("fall to spinball", this);
     connect(fall_with_spiningball_btn, &QPushButton::released, this, &MainWindow::fallToSpiningBall);
 
@@ -35,13 +35,22 @@ MainWindow::MainWindow(QWidget *parent)
     connect(save_as_vedio, &QPushButton::released, this, &MainWindow::saveAsvideo);
 
     model = nullptr;
+    is_playing = false;
+    play_timer = new QTimer();
+    play_timer->setInterval(1000.f / 60);
+    play_timer->setTimerType(Qt::TimerType::PreciseTimer);
+    play_timer->connect(play_timer, &QTimer::timeout, [=]()
+                        { this->render->update(); });
+    play_timer->start();
+    cal_timer = new QTimer();
+    cal_timer->setInterval(1);
+    cal_timer->connect(cal_timer, &QTimer::timeout, [=]
+                       { this->model->update(this->params); });
 }
 
 MainWindow::~MainWindow()
 {
-
 }
-
 
 void MainWindow::loadContent()
 {
@@ -75,15 +84,19 @@ void MainWindow::loadObj()
 
     QStringList filePaths;
     std::string file_path;
-    if (opener.exec()) {
+    if (opener.exec())
+    {
         filePaths = opener.selectedFiles();
-        if (filePaths.size() > 0) {
+        if (filePaths.size() > 0)
+        {
             file_path = filePaths[0].toStdString();
         }
     }
-    if (file_path.size() > 0) {
+    if (file_path.size() > 0)
+    {
         // get file path
-        if (model != nullptr) {
+        if (model != nullptr)
+        {
             delete model;
         }
         // create new object
@@ -94,40 +107,121 @@ void MainWindow::loadObj()
 
 void MainWindow::startStop()
 {
-
+    if (is_playing)
+    {
+        cal_timer->stop();
+        this->stop_start_btn->setText("start");
+    }
+    else
+    {
+        cal_timer->start();
+        this->stop_start_btn->setText("stop");
+    }
+    is_playing = !is_playing;
 }
 
 void MainWindow::saveCurrentFrame()
 {
-
 }
 
 void MainWindow::freeFall()
 {
-
+    this->model->reset();
+    this->model->transilation({0, 0.5, 0});
+    params.dt = 0.001;
+    params.E = 100000;
+    params.kd = 50;
+    params.fric = 0.7;
+    params.gravity = {0, -1, 0};
+    params.ground_normal = {0, 1, 0};
+    params.ground_position = {0, 0, 0};
+    params.mass = 1;
+    params.sphere_r = 0;
+    params.omega = 0;
+    params.fric_w = 0.1;
+    params.wind = {};
 }
 
 void MainWindow::freeFallToBall()
 {
-
+    this->model->reset();
+    this->model->transilation({0, 0.5, 0});
+    params.dt = 0.001;
+    params.fric = 1;
+    params.E = 100000;
+    params.kd = 50;
+    params.gravity = {0, -1, 0};
+    params.ground_normal = {0, 1, 0};
+    params.ground_position = {0, 0, 0};
+    params.mass = 1;
+    params.sphere_r = 0.15;
+    params.sphere_center = {0, 0.15, 0};
+    params.omega = 0;
+    params.fixed_corner = false;
+    params.fric_w = 0.2;
+    params.wind = {};
 }
 
 void MainWindow::fallFixedCorners()
 {
-
+    this->model->reset();
+    this->model->transilation({0, 1, 0.5});
+    params.dt = 0.001;
+    params.fric = 0.7;
+    params.E = 100000;
+    params.kd = 50;
+    params.gravity = {0, -1, 0};
+    params.ground_normal = {0, 1, 0};
+    params.ground_position = {0, 0, 0};
+    params.mass = 1;
+    params.sphere_r = 0;
+    params.sphere_center = {0, 0, 0};
+    params.omega = 0;
+    params.fixed_corner = true;
+    params.fric_w = 0.1;
+    params.wind = {};
 }
 
 void MainWindow::fallToSpiningBall()
 {
-
+    this->model->reset();
+    this->model->transilation({0, 0.5, 0});
+    params.dt = 0.001;
+    params.fric = 0.5;
+    params.E = 100000;
+    params.kd = 50;
+    params.gravity = {0, -1, 0};
+    params.ground_normal = {0, 1, 0};
+    params.ground_position = {0, 0, 0};
+    params.mass = 1;
+    params.sphere_r = 0.15;
+    params.sphere_center = {0, 0.3, 0};
+    params.omega = 10;
+    params.fixed_corner = false;
+    params.fric_w = 0.1;
+    params.wind = {};
 }
 
 void MainWindow::windAndFixedCorners()
 {
-    
+    this->model->reset();
+    this->model->transilation({0, 1, 0});
+    params.dt = 0.001;
+    params.fric = 0.7;
+    params.E = 100000;
+    params.kd = 50;
+    params.gravity = {0, -1, 0};
+    params.ground_normal = {0, 1, 0};
+    params.ground_position = {0, 0, 0};
+    params.mass = 1;
+    params.sphere_r = 0;
+    params.sphere_center = {0, 0, 0};
+    params.omega = 0;
+    params.fixed_corner = true;
+    params.fric_w = 0.1;
+    params.wind = {0, 0, 10};
 }
 
 void MainWindow::saveAsvideo()
 {
-
 }
