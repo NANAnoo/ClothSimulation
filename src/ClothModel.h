@@ -48,7 +48,7 @@ public:
     // function used for rendering
     void render();
     // save current model as a file;s
-    void saveAsFile(std::string file_path);
+    bool saveAsFile(std::string file_path);
     // update mass point
     void update(SimulationParameters &params);
     // transilation
@@ -126,6 +126,7 @@ private:
     std::vector<tinyobj::shape_t> inshapes;
     // textures
     std::unordered_map<std::string, GLuint> textures;
+    std::unordered_map<std::string, std::string> texture_files;
     // texture coords
     std::vector<unsigned int> texture_indices;
     // valid
@@ -133,6 +134,8 @@ private:
 
     // model transform
     Vec3 current_transilation;
+    // corners
+    unsigned int corner_1, corner_2, corner_3, corner_4;
 
     // prepare rendering:
     void preRendering();

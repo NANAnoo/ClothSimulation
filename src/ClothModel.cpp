@@ -2,7 +2,7 @@
 
 #include <QtOpenGL>
 #include <iostream>
-
+#include <fstream>
 #include <limits>
 
 #ifndef TINYOBJLOADER_IMPLEMENTATION
@@ -13,108 +13,106 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-static void CalcNormal(float N[3], float v0[3], float v1[3], float v2[3]) {
-  float v10[3];
-  v10[0] = v1[0] - v0[0];
-  v10[1] = v1[1] - v0[1];
-  v10[2] = v1[2] - v0[2];
+static void CalcNormal(float N[3], float v0[3], float v1[3], float v2[3])
+{
+	float v10[3];
+	v10[0] = v1[0] - v0[0];
+	v10[1] = v1[1] - v0[1];
+	v10[2] = v1[2] - v0[2];
 
-  float v20[3];
-  v20[0] = v2[0] - v0[0];
-  v20[1] = v2[1] - v0[1];
-  v20[2] = v2[2] - v0[2];
+	float v20[3];
+	v20[0] = v2[0] - v0[0];
+	v20[1] = v2[1] - v0[1];
+	v20[2] = v2[2] - v0[2];
 
-  N[0] = v10[1] * v20[2] - v10[2] * v20[1];
-  N[1] = v10[2] * v20[0] - v10[0] * v20[2];
-  N[2] = v10[0] * v20[1] - v10[1] * v20[0];
+	N[0] = v10[1] * v20[2] - v10[2] * v20[1];
+	N[1] = v10[2] * v20[0] - v10[0] * v20[2];
+	N[2] = v10[0] * v20[1] - v10[1] * v20[0];
 
-  float len2 = N[0] * N[0] + N[1] * N[1] + N[2] * N[2];
-  if (len2 > 0.0f) {
-    float len = sqrtf(len2);
+	float len2 = N[0] * N[0] + N[1] * N[1] + N[2] * N[2];
+	if (len2 > 0.0f)
+	{
+		float len = sqrtf(len2);
 
-    N[0] /= len;
-    N[1] /= len;
-    N[2] /= len;
-  }
+		N[0] /= len;
+		N[1] /= len;
+		N[2] /= len;
+	}
 }
 
-void computeSmoothingNormals(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape,
-                             std::unordered_map<int, Vec3>& smoothVertexNormals) {
-  smoothVertexNormals.clear();
-  std::unordered_map<int, Vec3>::iterator iter;
-
-  for (size_t f = 0; f < shape.mesh.indices.size() / 3; f++) {
-    // Get the three indexes of the face (all faces are triangular)
-    tinyobj::index_t idx0 = shape.mesh.indices[3 * f + 0];
-    tinyobj::index_t idx1 = shape.mesh.indices[3 * f + 1];
-    tinyobj::index_t idx2 = shape.mesh.indices[3 * f + 2];
-
-    // Get the three vertex indexes and coordinates
-    int vi[3];      // indexes
-    float v[3][3];  // coordinates
-
-    for (int k = 0; k < 3; k++) {
-      vi[0] = idx0.vertex_index;
-      vi[1] = idx1.vertex_index;
-      vi[2] = idx2.vertex_index;
-      assert(vi[0] >= 0);
-      assert(vi[1] >= 0);
-      assert(vi[2] >= 0);
-
-      v[0][k] = attrib.vertices[3 * vi[0] + k];
-      v[1][k] = attrib.vertices[3 * vi[1] + k];
-      v[2][k] = attrib.vertices[3 * vi[2] + k];
-    }
-
-    // Compute the normal of the face
-    float normal[3];
-    CalcNormal(normal, v[0], v[1], v[2]);
-
-    // Add the normal to the three vertexes
-    for (size_t i = 0; i < 3; ++i) {
-      iter = smoothVertexNormals.find(vi[i]);
-      if (iter != smoothVertexNormals.end()) {
-        // add
-        iter->second.x += normal[0];
-        iter->second.y += normal[1];
-        iter->second.z += normal[2];
-      } else {
-        smoothVertexNormals[vi[i]].x = normal[0];
-        smoothVertexNormals[vi[i]].y = normal[1];
-        smoothVertexNormals[vi[i]].z = normal[2];
-      }
-    }
-
-  }  // f
-
-  // Normalize the normals, that is, make them unit vectors
-  for (iter = smoothVertexNormals.begin(); iter != smoothVertexNormals.end();
-       iter++) {
-    iter->second = iter->second.normalize();
-  }
-} 
-
-static std::string GetBaseDir(const std::string &filepath)
+void computeSmoothingNormals(const tinyobj::attrib_t &attrib, const tinyobj::shape_t &shape,
+							 std::unordered_map<int, Vec3> &smoothVertexNormals)
 {
-	if (filepath.find_last_of("/\\") != std::string::npos)
-		return filepath.substr(0, filepath.find_last_of("/\\"));
-	return "";
+	smoothVertexNormals.clear();
+	std::unordered_map<int, Vec3>::iterator iter;
+
+	for (size_t f = 0; f < shape.mesh.indices.size() / 3; f++)
+	{
+		// Get the three indexes of the face (all faces are triangular)
+		tinyobj::index_t idx0 = shape.mesh.indices[3 * f + 0];
+		tinyobj::index_t idx1 = shape.mesh.indices[3 * f + 1];
+		tinyobj::index_t idx2 = shape.mesh.indices[3 * f + 2];
+
+		// Get the three vertex indexes and coordinates
+		int vi[3];	   // indexes
+		float v[3][3]; // coordinates
+
+		for (int k = 0; k < 3; k++)
+		{
+			vi[0] = idx0.vertex_index;
+			vi[1] = idx1.vertex_index;
+			vi[2] = idx2.vertex_index;
+			assert(vi[0] >= 0);
+			assert(vi[1] >= 0);
+			assert(vi[2] >= 0);
+
+			v[0][k] = attrib.vertices[3 * vi[0] + k];
+			v[1][k] = attrib.vertices[3 * vi[1] + k];
+			v[2][k] = attrib.vertices[3 * vi[2] + k];
+		}
+
+		// Compute the normal of the face
+		float normal[3];
+		CalcNormal(normal, v[0], v[1], v[2]);
+
+		// Add the normal to the three vertexes
+		for (size_t i = 0; i < 3; ++i)
+		{
+			iter = smoothVertexNormals.find(vi[i]);
+			if (iter != smoothVertexNormals.end())
+			{
+				// add
+				iter->second.x += normal[0];
+				iter->second.y += normal[1];
+				iter->second.z += normal[2];
+			}
+			else
+			{
+				smoothVertexNormals[vi[i]].x = normal[0];
+				smoothVertexNormals[vi[i]].y = normal[1];
+				smoothVertexNormals[vi[i]].z = normal[2];
+			}
+		}
+
+	} // f
+
+	// Normalize the normals, that is, make them unit vectors
+	for (iter = smoothVertexNormals.begin(); iter != smoothVertexNormals.end();
+		 iter++)
+	{
+		iter->second = iter->second.normalize();
+	}
 }
 
 ClothModel::ClothModel(std::string &file_path)
 {
 	is_valid = false;
 
-	std::string base_dir = GetBaseDir(file_path);
-	if (base_dir.empty())
-	{
-		base_dir = ".";
+	std::string base_dir = ".";
+	if (file_path.find_last_of("/\\") != std::string::npos) {
+		base_dir = file_path.substr(0, file_path.find_last_of("/\\"));
 	}
-#ifdef _WIN32
-	base_dir += "\\";
-#else
 	base_dir += "/";
-#endif
 
 	std::string warn;
 	std::string err;
@@ -149,7 +147,11 @@ ClothModel::ClothModel(std::string &file_path)
 					GLuint texture_id;
 					int w, h;
 					int comp;
-					std::string texture_filepath = base_dir + mp->diffuse_texname;
+					std::string texture_filepath = mp->diffuse_texname;
+					if (mp->diffuse_texname.find('/') == std::string::npos) {
+						texture_filepath = base_dir + mp->diffuse_texname;
+					}
+					texture_files.insert(std::make_pair(mp->diffuse_texname, texture_filepath));
 					unsigned char *image = stbi_load(texture_filepath.c_str(), &w, &h, &comp, STBI_default);
 					if (image)
 					{
@@ -257,13 +259,40 @@ ClothModel::ClothModel(std::string &file_path)
 			}
 		}
 	}
-	//
+	float x_max = -std::numeric_limits<float>::infinity(), z_max = -std::numeric_limits<float>::infinity(),
+		  x_min = std::numeric_limits<float>::infinity(), z_min = std::numeric_limits<float>::infinity();
+	corner_1 = 0, corner_2 = 0; corner_3 = 0; corner_4 = 0;
+	// find corner
+	for (auto pair : neighbours_of_vertices)
+	{
+		float x = inattrib.vertices[3 * pair.first];
+		float z = inattrib.vertices[3 * pair.first + 2];
+		if (x > inattrib.vertices[3 * corner_1] || z > inattrib.vertices[3 * corner_1 + 2])
+		{
+			corner_1 = pair.first;
+		}
+		if (x > inattrib.vertices[3 * corner_2] || z < inattrib.vertices[3 * corner_2 + 2])
+		{
+			corner_2 = pair.first;
+		}
+		if (x < inattrib.vertices[3 * corner_3] || z > inattrib.vertices[3 * corner_3 + 2])
+		{
+			corner_3 = pair.first;
+		}
+		if (x < inattrib.vertices[3 * corner_4] || z < inattrib.vertices[3 * corner_4 + 2])
+		{
+			corner_4 = pair.first;
+		}
+		x_max = std::max(x_max, x);
+		z_max = std::max(z_max, z);
+		x_min = std::min(x_min, x);
+		z_min = std::min(z_min, z);
+	}
+	// move to center
+	transilation({-(x_max + x_min)/2, 0, -(z_max + z_min) / 2} );
+	// init vertors
 	particles_velocity.resize(inattrib.vertices.size() / 3);
 	origin_vertex = std::vector<tinyobj::real_t>(inattrib.vertices.begin(), inattrib.vertices.end());
-
-	// unsigned int face_num = shape.mesh.indices.size() / 3;
-	// particles_position.resize(face_num);
-	// particles_velocity.resize(face_num);
 
 	is_valid = true;
 }
@@ -436,7 +465,8 @@ void ClothModel::render()
 		glColorPointer(3, GL_FLOAT, stride, (const void *)(sizeof(float) * 6));
 		glTexCoordPointer(2, GL_FLOAT, stride, (const void *)(sizeof(float) * 9));
 
-		if (material != nullptr) {
+		if (material != nullptr)
+		{
 			GLfloat mat_ambient[] = {material->ambient[0], material->ambient[1], material->ambient[2], 1.0f};
 			GLfloat mat_diffuse[] = {material->diffuse[0], material->diffuse[1], material->diffuse[2], 1.0f};
 			GLfloat mat_specular[] = {material->specular[0], material->specular[1], material->specular[2], 1.0f};
@@ -461,11 +491,125 @@ void ClothModel::render()
 	}
 }
 
-void ClothModel::saveAsFile(std::string file_path)
+bool ClothModel::saveAsFile(std::string file_path)
 {
+	// get file name
+	std::string file_name = file_path.substr(0, file_path.find_last_of(".obj") - 3);
+	std::string mtl_file = file_name + ".mtl";
+	if (file_name.find('/') != std::string::npos) {
+		file_name = file_name.substr(file_name.find_last_of('/')+1);
+	}
+	std::cout << mtl_file << std::endl;
+	std::cout << file_name << std::endl;
+
+	// write .obj file
+	std::ofstream file;
+    file.open(file_path, std::ios::out);
+    if (!file.is_open())
+        return false;
+    file.setf(std::ios::showpoint);
+    file.precision(6);
+	if (materials.size() > 0) {
+		// has material file
+		file << "mtllib ./" << file_name << ".mtl" << std::endl;
+	}
+	file << std::endl;
+	for (unsigned int v = 0; v < inattrib.vertices.size() / 3; v ++ )
+	{
+		file << "v " << inattrib.vertices[3 * v] << " " << 
+						inattrib.vertices[3 * v + 1] << " " << 
+						inattrib.vertices[3 * v + 2] << std::endl;
+	}
+	for (unsigned int v = 0; v < inattrib.normals.size() / 3; v ++ )
+	{
+		file << "vn " << inattrib.normals[3 * v] << " " << 
+						inattrib.normals[3 * v + 1] << " " << 
+						inattrib.normals[3 * v + 2]<< std::endl;
+	}
+	for (unsigned int v = 0; v < inattrib.texcoords.size() / 2; v ++ )
+	{
+		file << "vt " << inattrib.texcoords[2 * v] << " " << 
+						inattrib.texcoords[2 * v + 1]<< std::endl;
+	}
+	file << std::endl;
+	// write all shapes
+	for (auto shape : inshapes)
+	{
+		// try to write name
+		if (shape.name.size() > 0) {
+			file << "o " << shape.name << std::endl;
+		}
+		// try to write material
+		if (shape.mesh.material_ids.size() > 0 && materials.size() > shape.mesh.material_ids[0]) {
+			std::string m_name = materials[shape.mesh.material_ids[0]].name;
+			file << "usemtl " << m_name << std::endl;
+		}
+		// write all faces
+		for (unsigned int f = 0; f < shape.mesh.indices.size() / 3; f ++)
+		{
+			file << "f ";
+			for (unsigned int k = 0; k < 3; k ++) {
+				auto idx = shape.mesh.indices[3 * f + k];
+				file << idx.vertex_index + 1<< "/" 
+				 << idx.texcoord_index + 1 << "/" 
+				 << idx.normal_index + 1 << " ";
+			}
+			file << std::endl;
+		}
+		file << std::endl;
+	}
+	file.close();
+
+	// write mtl file
+	if (materials.size() > 0)
+	{
+		file.open(mtl_file);
+		if (!file.is_open())
+        	return false;
+		for (auto m : materials)
+		{
+			file << "newmtl " << m.name << std::endl;
+			// ambient
+			file << "Ka " << m.ambient[0] << " " 
+						 << m.ambient[1] << " " 
+						 << m.ambient[2] << std::endl;
+			// diffuse
+			file << "Kd " << m.diffuse[0] << " " 
+						 << m.diffuse[1] << " " 
+						 << m.diffuse[2] << std::endl;
+			// specular
+			file << "Ks " << m.specular[0] << " " 
+						 << m.specular[1] << " " 
+						 << m.specular[2] << std::endl;
+			// transmittance
+			file << "Kt " << m.transmittance[0] << " " 
+						 << m.transmittance[1] << " " 
+						 << m.transmittance[2] << std::endl;
+			// emission
+			file << "Kt " << m.emission[0] << " " 
+						 << m.emission[1] << " " 
+						 << m.emission[2] << std::endl;
+			// ior
+			file << "Ni " << m.ior << std::endl;
+
+			// shininess
+			file << "Ns " << m.shininess << std::endl;
+
+			// illum
+			file << "illum " << m.illum << std::endl;
+
+			// map_Kd
+			if (texture_files.find(m.diffuse_texname) != texture_files.end()) {
+				file << "map_Kd " <<  texture_files[m.diffuse_texname] << std::endl;
+			}
+			file << std::endl;
+		}
+	}
+	file.close();
+	return true;
 }
 
-static void boundryUpdate(Vec3 &pos, Vec3 &vel, Vec3 surf_o, Vec3 sur_n)
+static void boundryUpdate(Vec3 &pos, Vec3 &vel, Vec3 surf_o, Vec3 sur_n, float coe)
 {
 	Vec3 o_p = pos - surf_o;
 	float res = o_p * sur_n;
@@ -475,8 +619,7 @@ static void boundryUpdate(Vec3 &pos, Vec3 &vel, Vec3 surf_o, Vec3 sur_n)
 		pos = (o_p - sur_n * res) + surf_o;
 		// remove the velosity along normal
 		res = vel * sur_n;
-		vel = vel - sur_n * res;
-		// vel = (vel - surf_v) * 0.5;
+		vel = (vel - sur_n * res) * coe;
 	}
 }
 
@@ -568,20 +711,15 @@ std::vector<Vec3> ClothModel::getAccelarations(SimulationParameters &params,
 											   std::vector<tinyobj::real_t> &current_positions,
 											   std::vector<Vec3> &current_velosity)
 {
-	// Timer timer("getAccelarations");
 	std::vector<Vec3> accs = std::vector<Vec3>(current_velosity.size());
 	// mass spring model
 	// calculate acceleration first
-	ClothModel *model;
-	int fixed_size = 0;
 	for (auto pair : neighbours_of_vertices)
 	{
 		// get current position
 		unsigned int index = pair.first;
-		if (params.fixed_corner && pair.second.size() == 3 && fixed_size < 2)
+		if (params.fixed_corner && (index == corner_2 || index == corner_4))
 		{
-			// fix two adject corner
-			fixed_size++;
 			continue;
 		}
 		Vec3 point(
@@ -659,11 +797,11 @@ void ClothModel::updatePositionAtBounday(SimulationParameters &params, std::vect
 				float angle_velosity = r_on_XZ * params.omega;
 				Vec3 angle_velosity_dir = (params.ground_normal.Cross(xz_radius)).normalize();
 				Vec3 surf_v = angle_velosity_dir * angle_velosity;
-				boundryUpdate(position, velosity[index], surf_p, surf_n);
+				boundryUpdate(position, velosity[index], surf_p, surf_n, 1);
 			}
 		}
 		// ground test:
-		boundryUpdate(position, velosity[index], params.ground_position, params.ground_normal);
+		boundryUpdate(position, velosity[index], params.ground_position, params.ground_normal, 0);
 		positions[3 * index + 0] = position.x;
 		positions[3 * index + 1] = position.y;
 		positions[3 * index + 2] = position.z;

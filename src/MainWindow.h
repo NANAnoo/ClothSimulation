@@ -49,6 +49,8 @@ private:
     void fallToSpiningBall();
     QPushButton *wind_and_fixed_corners_btn;
     void windAndFixedCorners();
+    QPushButton *load_scene_btn;
+    void loadScene();
 
     QPushButton *save_as_vedio;
     void saveAsvideo();

@@ -9,7 +9,7 @@
 # Faces: 7938
 #
 ####
-mtllib ./square64.obj.mtl
+mtllib ./square64.mtl
 
 vn 0.000000 1.000000 -0.000000
 v 0.492187 0.000000 0.492188

@@ -51,10 +51,10 @@ void RenderWidget::paintGL()
             glLineWidth(1);
         }
         glBegin(GL_LINES);
-        glVertex3f(w, 0, -0.5);
-        glVertex3f(w, 0, 0.5);
-        glVertex3f(-0.5, 0, w);
-        glVertex3f(0.5, 0, w);
+        glVertex3f(w, -0.01, -0.5);
+        glVertex3f(w, -0.01, 0.5);
+        glVertex3f(-0.5, -0.01, w);
+        glVertex3f(0.5, -0.01, w);
         glEnd();
     }
 
@@ -69,6 +69,12 @@ void RenderWidget::paintGL()
     glLightfv(GL_LIGHT0, GL_DIFFUSE , light_diffuse ); 
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular); 
     glEnable(GL_LIGHT0);
+    light_position[1] = -20.0;
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position); 
+    glLightfv(GL_LIGHT1, GL_AMBIENT , light_ambient );
+    glLightfv(GL_LIGHT1, GL_DIFFUSE , light_diffuse ); 
+    glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular); 
+    glEnable(GL_LIGHT1);
    
     // update model
     if (model != nullptr && model->isValid()) {
