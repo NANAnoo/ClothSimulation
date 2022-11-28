@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <QFileDialog>
+#include <unistd.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -35,11 +36,12 @@ MainWindow::MainWindow(QWidget *parent)
     load_scene_btn = new QPushButton("load scene from file", this);
     connect(load_scene_btn, &QPushButton::released, this, &MainWindow::loadScene);
 
-    save_as_vedio = new QPushButton("save as video", this);
+    save_as_vedio = new QPushButton("start record", this);
     connect(save_as_vedio, &QPushButton::released, this, &MainWindow::saveAsvideo);
 
     model = nullptr;
     is_playing = false;
+    is_recording = false;
     play_timer = new QTimer();
     play_timer->setInterval(1000.f / 60);
     play_timer->setTimerType(Qt::TimerType::PreciseTimer);
@@ -86,7 +88,6 @@ void MainWindow::loadContent()
     fall_with_spiningball_btn->setDisabled(true);
     wind_and_fixed_corners_btn->setDisabled(true);
     load_scene_btn->setDisabled(true);
-    save_as_vedio->setDisabled(true);
 }
 
 void MainWindow::loadObj()
@@ -149,7 +150,6 @@ void MainWindow::startStop()
     }
     is_playing = !is_playing;
     save_current_frame->setDisabled(is_playing);
-    save_as_vedio->setDisabled(is_playing);
 }
 
 void MainWindow::saveCurrentFrame()
@@ -352,4 +352,61 @@ void MainWindow::loadScene()
 
 void MainWindow::saveAsvideo()
 {
+    std::string tmp_file = "./temp.avi";
+    if (is_recording) {
+        // stop recording
+        save_as_vedio->setText("start record");
+        this->render->stopRecord();
+
+        if (video.isOpened())
+        {
+            video.release();
+        }
+
+        // save file
+        QFileDialog opener(this);
+        opener.setFileMode(QFileDialog::AnyFile);
+        opener.setNameFilter(tr("avi files (*.avi)"));
+        opener.setViewMode(QFileDialog::List);
+        opener.setAcceptMode(QFileDialog::AcceptSave);
+
+        QStringList filePaths;
+        if (opener.exec()) {
+            filePaths = opener.selectedFiles();
+            if (filePaths.size() > 0) {
+                rename(tmp_file.c_str(), filePaths[0].toStdString().c_str());
+            }
+        }
+    } else {
+        // start recording
+        save_as_vedio->setText("save video");
+        // remove last temp file
+        if (access(tmp_file.c_str(), F_OK)) {
+            remove(tmp_file.c_str());
+        } 
+        int width = this->render->width() * 2;
+        int height = this->render->height() * 2;
+        video.open(tmp_file, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                   60.0, cv::Size(width, height));
+        if (video.isOpened())
+        {
+            this->render->startRecordWidget([this, width, height](unsigned char *data){
+                cv::Mat frame = cv::Mat(height, width, CV_8UC3);
+                for (unsigned int h =0; h < height; h ++) {
+                    for (unsigned int w = 0; w < width; w ++) {
+                        frame.at<cv::Vec<unsigned char, 3>>(height - h, w)[2] = data[(h * width + w) * 3];
+                        frame.at<cv::Vec<unsigned char, 3>>(height - h, w)[1] = data[(h * width + w) * 3 + 1];
+                        frame.at<cv::Vec<unsigned char, 3>>(height - h, w)[0] = data[(h * width + w) * 3 + 2];
+                    }
+                }
+                if (video.isOpened())
+                {
+                    // write one frame
+                    video << frame;
+                }
+            });
+        }
+
+    }
+    is_recording = !is_recording;
 }

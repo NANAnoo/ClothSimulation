@@ -39,7 +39,13 @@ win32 {
     LIBS += -lopengl32
     LIBS += -lglu32
 }
+
+INCLUDEPATH += /usr/local/include/opencv4
+
 LIBS += -F"/Library/Frameworks/" -framework GLUT
+
+LIBS += -L/usr/local/lib -lopencv_imgproc -lopencv_highgui -lopencv_core -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_img_hash
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

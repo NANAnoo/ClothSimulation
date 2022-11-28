@@ -10,6 +10,12 @@ void RenderWidget::initializeGL()
 {
     glEnable(GL_DEPTH_TEST);
     glClearColor(0, 0, 0, 0);
+
+    // map buffer
+    glGenBuffers(1, &buffer_handle);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_handle);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * width() * height()* 3 * 4, NULL, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);   
     model = nullptr;
 }
 
@@ -79,6 +85,19 @@ void RenderWidget::paintGL()
     // update model
     if (model != nullptr && model->isValid()) {
         model->render();
+    }
+    if (is_recording)
+    {
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer_handle);
+        glReadPixels(0, 0, width() * 2, height() * 2, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        // map data
+        unsigned char *buffer = (unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+        if (framedata_callback && is_recording)
+        {
+            framedata_callback(buffer);
+        }
+        // unmap
+        glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
     }
 }
 

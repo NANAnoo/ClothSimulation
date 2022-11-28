@@ -13,37 +13,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-static void CalcNormal(float N[3], float v0[3], float v1[3], float v2[3])
+void smoothNormals(const tinyobj::attrib_t &attrib, const tinyobj::shape_t &shape,
+							 std::unordered_map<int, Vec3> &smooth_normals)
 {
-	float v10[3];
-	v10[0] = v1[0] - v0[0];
-	v10[1] = v1[1] - v0[1];
-	v10[2] = v1[2] - v0[2];
-
-	float v20[3];
-	v20[0] = v2[0] - v0[0];
-	v20[1] = v2[1] - v0[1];
-	v20[2] = v2[2] - v0[2];
-
-	N[0] = v10[1] * v20[2] - v10[2] * v20[1];
-	N[1] = v10[2] * v20[0] - v10[0] * v20[2];
-	N[2] = v10[0] * v20[1] - v10[1] * v20[0];
-
-	float len2 = N[0] * N[0] + N[1] * N[1] + N[2] * N[2];
-	if (len2 > 0.0f)
-	{
-		float len = sqrtf(len2);
-
-		N[0] /= len;
-		N[1] /= len;
-		N[2] /= len;
-	}
-}
-
-void computeSmoothingNormals(const tinyobj::attrib_t &attrib, const tinyobj::shape_t &shape,
-							 std::unordered_map<int, Vec3> &smoothVertexNormals)
-{
-	smoothVertexNormals.clear();
+	smooth_normals.clear();
 	std::unordered_map<int, Vec3>::iterator iter;
 
 	for (size_t f = 0; f < shape.mesh.indices.size() / 3; f++)
@@ -53,51 +26,32 @@ void computeSmoothingNormals(const tinyobj::attrib_t &attrib, const tinyobj::sha
 		tinyobj::index_t idx1 = shape.mesh.indices[3 * f + 1];
 		tinyobj::index_t idx2 = shape.mesh.indices[3 * f + 2];
 
-		// Get the three vertex indexes and coordinates
-		int vi[3];	   // indexes
-		float v[3][3]; // coordinates
+		Vec3 v0 = Vec3(attrib.vertices[3 * idx0.vertex_index],
+					   attrib.vertices[3 * idx0.vertex_index + 1],
+					   attrib.vertices[3 * idx0.vertex_index + 2]);
+		Vec3 v1 = Vec3(attrib.vertices[3 * idx1.vertex_index],
+					   attrib.vertices[3 * idx1.vertex_index + 1],
+					   attrib.vertices[3 * idx1.vertex_index + 2]);
+		Vec3 v2 = Vec3(attrib.vertices[3 * idx2.vertex_index],
+					   attrib.vertices[3 * idx2.vertex_index + 1],
+					   attrib.vertices[3 * idx2.vertex_index + 2]);
+		
+		Vec3 n = ((v0 - v1).Cross(v2 - v1)).normalize();
 
-		for (int k = 0; k < 3; k++)
-		{
-			vi[0] = idx0.vertex_index;
-			vi[1] = idx1.vertex_index;
-			vi[2] = idx2.vertex_index;
-			assert(vi[0] >= 0);
-			assert(vi[1] >= 0);
-			assert(vi[2] >= 0);
-
-			v[0][k] = attrib.vertices[3 * vi[0] + k];
-			v[1][k] = attrib.vertices[3 * vi[1] + k];
-			v[2][k] = attrib.vertices[3 * vi[2] + k];
-		}
-
-		// Compute the normal of the face
-		float normal[3];
-		CalcNormal(normal, v[0], v[1], v[2]);
-
-		// Add the normal to the three vertexes
-		for (size_t i = 0; i < 3; ++i)
-		{
-			iter = smoothVertexNormals.find(vi[i]);
-			if (iter != smoothVertexNormals.end())
-			{
-				// add
-				iter->second.x += normal[0];
-				iter->second.y += normal[1];
-				iter->second.z += normal[2];
-			}
-			else
-			{
-				smoothVertexNormals[vi[i]].x = normal[0];
-				smoothVertexNormals[vi[i]].y = normal[1];
-				smoothVertexNormals[vi[i]].z = normal[2];
-			}
-		}
-
+		// add normal to all vertices
+		smooth_normals[idx0.vertex_index].x += n.x;
+		smooth_normals[idx0.vertex_index].y += n.y;
+		smooth_normals[idx0.vertex_index].z += n.z;
+		smooth_normals[idx1.vertex_index].x += n.x;
+		smooth_normals[idx1.vertex_index].y += n.y;
+		smooth_normals[idx1.vertex_index].z += n.z;
+		smooth_normals[idx2.vertex_index].x += n.x;
+		smooth_normals[idx2.vertex_index].y += n.y;
+		smooth_normals[idx2.vertex_index].z += n.z;
 	} // f
 
-	// Normalize the normals, that is, make them unit vectors
-	for (iter = smoothVertexNormals.begin(); iter != smoothVertexNormals.end();
+	// Normalize the normals
+	for (iter = smooth_normals.begin(); iter != smooth_normals.end();
 		 iter++)
 	{
 		iter->second = iter->second.normalize();
@@ -309,7 +263,7 @@ void ClothModel::preRendering()
 		int m_id = shape.mesh.material_ids.size() > 0 ? shape.mesh.material_ids[0] : -1;
 		unsigned int index_buffer = 0;
 		std::unordered_map<int, Vec3> smooth_normals;
-		computeSmoothingNormals(inattrib, shape, smooth_normals);
+		smoothNormals(inattrib, shape, smooth_normals);
 		for (unsigned int f = 0; f < face_num; f++)
 		{
 			// get index from a triangle

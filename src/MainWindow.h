@@ -8,6 +8,8 @@
 #include <QTimer>
 #include <string>
 
+#include <opencv2/opencv.hpp>
+
 #include "RenderWidget.h"
 #include "ClothModel.h"
 
@@ -53,10 +55,12 @@ private:
     void loadScene();
 
     QPushButton *save_as_vedio;
+    bool is_recording;
     void saveAsvideo();
 
     // model
     ClothModel *model;
+    cv::VideoWriter video;
 };
 
 #endif // MAINWINDOW_H
