@@ -352,7 +352,7 @@ void MainWindow::loadScene()
 
 void MainWindow::saveAsvideo()
 {
-    std::string tmp_file = "./temp.avi";
+    std::string tmp_file = "/tmp/temp.avi";
     if (is_recording) {
         // stop recording
         save_as_vedio->setText("start record");
