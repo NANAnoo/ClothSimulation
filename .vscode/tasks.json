@@ -1,0 +1,112 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Create Build Dir",
+            "type": "shell",
+            "command": "mkdir build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Run qmake",
+            "type": "shell",
+            "command": "~/Develop/QT/qt5-5.15-macOS-release/qtbase/bin/qmake",
+            "args": [
+                "${workspaceFolder}/ClothSimulation.pro"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            }
+        },
+        {
+            "label": "Run Debug qmake",
+            "type": "shell",
+            "command": "~/Develop/QT/qt5-5.15-macOS-release/qtbase/bin/qmake",
+            "args": [
+                "CONFIG+=debug", "${workspaceFolder}/ClothSimulation.pro"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            }
+        },
+        {
+            "label": "Alter ARCH",
+            "type": "shell",
+            "command": "sed -i \"\" 's/x86_64/arm64/' Makefile",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            }
+        },
+        {
+            "label": "Run make",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j15"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            }
+        },
+        {
+            "label": "Clear build folder",
+            "type": "shell",
+            "command": "make clean",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            }
+        },
+        {
+            "label": "Clear Build",
+            "type": "shell",
+            "command": "rm -rf ${workspaceFolder}/build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Build",
+            "dependsOn": [
+                "Create Build Dir",
+                "Run qmake",
+                "Alter ARCH",
+                "Run make"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "Clean Build",
+            "dependsOn": [
+                "Clear Build",
+                "Create Build Dir",
+                "Run qmake",
+                "Alter ARCH",
+                "Run make"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Clean Debug",
+            "dependsOn": [
+                "Clear Build",
+                "Create Build Dir",
+                "Run Debug qmake",
+                "Alter ARCH",
+                "Run make"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+    ]
+}

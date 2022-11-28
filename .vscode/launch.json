@@ -1,0 +1,59 @@
+{
+    "configurations": [
+        {
+            "name": "Build And Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ClothSimulation.app/Contents/MacOS/ClothSimulation",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [
+            ],
+            "visualizerFile": "${workspaceFolder}/build/qt5.natvis",
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Clean Debug"
+        },
+        {
+            "name": "Debug Without Build",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ClothSimulation.app/Contents/MacOS/ClothSimulation",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [
+            ],
+            "visualizerFile": "${workspaceFolder}/build/qt5.natvis",
+            "externalConsole": false,
+            "MIMode": "lldb"
+        },
+        {
+            "name": "Build And Run",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ClothSimulation.app/Contents/MacOS/ClothSimulation",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [
+            ],
+            "visualizerFile": "${workspaceFolder}/build/qt5.natvis",
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Clean Build"
+        },
+        {
+            "name": "Run Without Build",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ClothSimulation.app/Contents/MacOS/ClothSimulation",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [
+            ],
+            "visualizerFile": "${workspaceFolder}/build/qt5.natvis",
+            "externalConsole": false,
+            "MIMode": "lldb"
+        },
+    ],
+    "version": "2.0.0"
+}
