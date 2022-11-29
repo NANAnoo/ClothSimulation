@@ -49,6 +49,7 @@ void RenderWidget::paintGL()
     glRotatef(rotation_y, 0, 1, 0);
 
     glColor3f(0.8, 0.8, 1);
+    // draw ground
     for (unsigned int i = 0; i < 21; i ++) {
         float w = 0.05 * i - 0.5;
         if (i % 5 == 0) {
@@ -89,6 +90,8 @@ void RenderWidget::paintGL()
     if (is_recording)
     {
         glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer_handle);
+        // Another trick code, since macos scale each pixel with 4 pixels, 
+        // the actural buffer size is 4 times than the width() * height()
         glReadPixels(0, 0, width() * 2, height() * 2, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         // map data
         unsigned char *buffer = (unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);

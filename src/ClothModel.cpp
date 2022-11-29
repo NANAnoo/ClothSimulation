@@ -70,7 +70,8 @@ ClothModel::ClothModel(std::string &file_path)
 
 	std::string warn;
 	std::string err;
-
+	
+	// load file
 	bool ret = tinyobj::LoadObj(&inattrib, &inshapes, &materials, &warn, &err,
 								file_path.c_str(), base_dir.c_str());
 
@@ -86,6 +87,7 @@ ClothModel::ClothModel(std::string &file_path)
 	{
 		std::cerr << "Failed to load " << file_path << std::endl;
 	}
+	// trick code, if this is a square mesh, add extra strings
 	bool is_square = file_path.find_last_of("square") > 0;
 	for (auto shape : inshapes)
 	{
@@ -216,7 +218,7 @@ ClothModel::ClothModel(std::string &file_path)
 	float x_max = -std::numeric_limits<float>::infinity(), z_max = -std::numeric_limits<float>::infinity(),
 		  x_min = std::numeric_limits<float>::infinity(), z_min = std::numeric_limits<float>::infinity();
 	corner_1 = 0, corner_2 = 0; corner_3 = 0; corner_4 = 0;
-	// find corner
+	// find corners
 	for (auto pair : neighbours_of_vertices)
 	{
 		float x = inattrib.vertices[3 * pair.first];
@@ -731,7 +733,6 @@ std::vector<Vec3> ClothModel::getAccelarations(SimulationParameters &params,
 
 void ClothModel::updatePositionAtBounday(SimulationParameters &params, std::vector<tinyobj::real_t> &positions, std::vector<Vec3> &velosity)
 {
-	// Timer timer("updatePositionAtBounday");
 	unsigned int v_num = positions.size() / 3;
 	for (unsigned int index = 0; index < velosity.size(); index++)
 	{

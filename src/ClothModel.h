@@ -40,7 +40,7 @@ public:
         float omega;
         // fix corner
         bool fixed_corner;
-        // TODO: wind
+        // wind
         Vec3 wind;
         float fric_w;
     };
@@ -75,10 +75,6 @@ public:
             particles_velocity[v].z = 0;
         }
     }
-    // rotation
-
-    // scale
-
     // valid
     bool isValid() {return is_valid;}
 
@@ -137,7 +133,7 @@ private:
     // corners
     unsigned int corner_1, corner_2, corner_3, corner_4;
 
-    // prepare rendering:
+    // prepare rendering, upload data to GPU
     void preRendering();
     // calculate accelarations
     std::vector<Vec3> getAccelarations(SimulationParameters &params,
