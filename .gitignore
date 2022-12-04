@@ -1,4 +1,6 @@
-build
+*build*/
 outputs
 .DS_Store
+.idea/
+.vscode/
 ClothSimulation.pro.user
